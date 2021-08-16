@@ -1,1 +1,1 @@
-# CoronovirusTweetClassification
+# CoronavirusTweetClassification
