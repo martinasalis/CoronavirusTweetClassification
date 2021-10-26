@@ -71,7 +71,7 @@ def decontraction(text):
   text = re.sub(r"won\'t've", " will not have", text)
   text = re.sub(r"can\'t", " can not", text)
   text = re.sub(r"don\'t", " do not", text)
-    
+
   text = re.sub(r"can\'t've", " can not have", text)
   text = re.sub(r"ma\'am", " madam", text)
   text = re.sub(r"let\'s", " let us", text)
@@ -80,7 +80,7 @@ def decontraction(text):
   text = re.sub(r"sha\n't", " shall not", text)
   text = re.sub(r"o\'clock", " of the clock", text)
   text = re.sub(r"y\'all", " you all", text)
-    
+
   text = re.sub(r"n\'t", " not", text)
   text = re.sub(r"n\'t've", " not have", text)
   text = re.sub(r"\'re", " are", text)
@@ -103,10 +103,10 @@ def seperate_alphanumeric(text):
 
 
 def cont_rep_char(text):
-  tchr = text.group(0) 
-    
+  tchr = text.group(0)
+
   if len(tchr) > 1:
-    return tchr[0:2] 
+    return tchr[0:2]
 
 
 def unique_char(rep, text):
@@ -121,7 +121,7 @@ def char(text):
 
 # Plot class distribution
 def plot_class_dist(labels, tweets, title, max_item):
-  
+
   all_colors = list(plt.cm.colors.cnames.keys())
   c = np.random.choice(all_colors, 6)
 
@@ -170,7 +170,7 @@ def sent_vectorizer(sent, model):
       numw+=1
     except:
       pass
-  
+
   return np.asarray(sent_vec)/numw
 
 
@@ -179,9 +179,9 @@ def main():
   ## Flags
   print_graphs = False
   print_network_details = False
-  model_type = Model.GOOGLE
-  do_baseline = False
-  do_network = True
+  model_type = Model.TWITTER
+  do_baseline = True
+  do_network = False
 
   ## Load dataset
 
@@ -242,25 +242,25 @@ def main():
 
   # Word cloud
   if(print_graphs):
-    # Split sentiment groups 
+    # Split sentiment groups
     Positive = dataset[(dataset['Sentiment'] == "Extremely Positive") | (dataset['Sentiment'] == "Positive")].OriginalTweet
     Neutral  = dataset[(dataset['Sentiment'] == "Extremely Negative") | (dataset['Sentiment'] == "Negative")].OriginalTweet
     Negative = dataset[dataset['Sentiment'] == "Neutral"].OriginalTweet
 
-    # WordCloud of Negative Tweets 
+    # WordCloud of Negative Tweets
     plt.figure(figsize = (20,20))
     wordcould = WordCloud(min_font_size = 3,  max_words = 3000 , width = 1600 , height = 680).generate(" ".join(Negative))
     plt.imshow(wordcould, interpolation = 'bilinear')
     plt.grid(None)
 
-    # WordCloud of Positive Tweets 
-    plt.figure(figsize = (20,20)) 
+    # WordCloud of Positive Tweets
+    plt.figure(figsize = (20,20))
     wordcould = WordCloud(min_font_size = 3,  max_words = 3000 , width = 1600 , height = 680).generate(" ".join(Positive))
     plt.imshow(wordcould,interpolation = 'bilinear')
     plt.grid(None)
 
-    # WordCloud of Neutral Tweets 
-    plt.figure(figsize = (20,20)) 
+    # WordCloud of Neutral Tweets
+    plt.figure(figsize = (20,20))
     wordcould = WordCloud(min_font_size = 3,  max_words = 3000 , width = 1600 , height = 680).generate(" ".join(Neutral))
     plt.imshow(wordcould,interpolation = 'bilinear')
     plt.grid(None)
@@ -300,7 +300,7 @@ def main():
 
     vocab = wv_from_bin.wv.vocab
     vectors = wv_from_bin.wv.vectors
-  
+
   else:
     maxlen = 100
 
@@ -325,6 +325,7 @@ def main():
     clf= MLPClassifier()
     y_pred = clf.fit(x_train, y_train).predict(x_test)
 
+    print("MLPClassifier")
     print("Number of mislabeled points out of a total %d points : %d" % (x_test.shape[0], (y_test != y_pred).sum()))
     print(clf.score(x_test, y_test))
 
@@ -333,12 +334,14 @@ def main():
     clf = GridSearchCV(MLPClassifier(), parameters, cv=5).fit(x_train, y_train)
     y_pred = clf.predict(x_test)
 
+    print("MLPClassifier with CV")
     print("Number of mislabeled points out of a total %d points : %d" % (x_test.shape[0], (y_test != y_pred).sum()))
     print(clf.score(x_test, y_test))
 
     # Gaussian Naive Bayes
     gnb = GaussianNB()
     y_pred = gnb.fit(x_train, y_train).predict(x_test)
+    print("GaussianNB")
     print("Number of mislabeled points out of a total %d points : %d" % (x_test.shape[0], (y_test != y_pred).sum()))
     print(clf.score(x_test, y_test))
 
@@ -346,25 +349,29 @@ def main():
     parameters = {}
     clf = GridSearchCV(GaussianNB(), parameters, cv=5).fit(x_train, y_train)
     y_pred = clf.predict(x_test)
+    print("GaussianNB with CV")
     print("Number of mislabeled points out of a total %d points : %d" % (x_test.shape[0], (y_test != y_pred).sum()))
     print(clf.score(x_test, y_test))
 
     # Logistic Regression
-    clf = LogisticRegression(random_state=0).fit(x_train, y_train)
+    clf = LogisticRegression(random_state=0, solver='liblinear').fit(x_train, y_train)
     y_pred = clf.predict(x_test)
+    print("LogisticRegression")
     print("Number of mislabeled points out of a total %d points : %d" % (x_test.shape[0], (y_test != y_pred).sum()))
     print(clf.score(x_test, y_test))
 
     #Logistic Regression with Cross Validation
     parameters = {}
-    clf = GridSearchCV(LogisticRegression(random_state=0), parameters, cv=5).fit(x_train, y_train)
+    clf = GridSearchCV(LogisticRegression(random_state=0, solver='liblinear'), parameters, cv=5).fit(x_train, y_train)
     y_pred = clf.predict(x_test)
+    print("LogisticRegression with CV")
     print("Number of mislabeled points out of a total %d points : %d" % (x_test.shape[0], (y_test != y_pred).sum()))
     print(clf.score(x_test, y_test))
 
     # SVM
     clf = SVC(kernel='linear', max_iter=100, decision_function_shape='ovo')
     y_pred = clf.fit(x_train, y_train).predict(x_test)
+    print("SVC")
     print("Number of mislabeled points out of a total %d points : %d" % (x_test.shape[0], (y_test != y_pred).sum()))
     print(clf.score(x_test, y_test))
 
@@ -372,12 +379,14 @@ def main():
     parameters = {}
     clf = GridSearchCV(SVC(kernel='linear', max_iter=100, decision_function_shape='ovo'), parameters, cv=5).fit(x_train, y_train)
     y_pred = clf.predict(x_test)
+    print("SVC with CV")
     print("Number of mislabeled points out of a total %d points : %d" % (x_test.shape[0], (y_test != y_pred).sum()))
     print(clf.score(x_test, y_test))
 
     # Random Forest
     clf = RandomForestClassifier(max_depth=50, random_state=0, n_estimators=250)
     y_pred = clf.fit(x_train, y_train).predict(x_test)
+    print("RandomForestClassifier")
     print("Number of mislabeled points out of a total %d points : %d" % (x_test.shape[0], (y_test != y_pred).sum()))
     print(clf.score(x_test, y_test))
 
@@ -385,6 +394,7 @@ def main():
     parameters = {}
     clf = GridSearchCV(RandomForestClassifier(max_depth=50, random_state=0, n_estimators=250), parameters, cv=5).fit(x_train, y_train)
     y_pred = clf.predict(x_test)
+    print("RandomForestClassifier with CV")
     print("Number of mislabeled points out of a total %d points : %d" % (x_test.shape[0], (y_test != y_pred).sum()))
     print(clf.score(x_test, y_test))
 
@@ -396,13 +406,13 @@ def main():
     y_test = Y_test
     x_test = X_test
 
-    # Convert y to categorical 
+    # Convert y to categorical
     y_train = to_categorical(y_train, 3)
     y_test  = to_categorical(y_test, 3)
     y_val  = to_categorical(y_val, 3)
 
     max_features = 30000
-    tokenizer = Tokenizer(num_words=max_features) # num_words=max_features, 
+    tokenizer = Tokenizer(num_words=max_features) # num_words=max_features,
     tokenizer.fit_on_texts(list(X_train))
 
     list_tokenized_train = tokenizer.texts_to_sequences(x_train)
@@ -410,7 +420,7 @@ def main():
     list_tokenized_test = tokenizer.texts_to_sequences(x_test)
 
     # convert tokenized texts into same padding size
-    embed_size = 128 
+    embed_size = 128
     X_train_final = pad_sequences(list_tokenized_train, maxlen=maxlen)
     X_val_final = pad_sequences(list_tokenized_val, maxlen=maxlen)
     X_test_final = pad_sequences(list_tokenized_test, maxlen=maxlen)
