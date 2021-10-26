@@ -179,9 +179,9 @@ def main():
   ## Flags
   print_graphs = False
   print_network_details = False
-  model_type = Model.TWITTER
-  do_baseline = True
-  do_network = False
+  model_type = Model.GOOGLE
+  do_baseline = False
+  do_network = True
 
   ## Load dataset
 
