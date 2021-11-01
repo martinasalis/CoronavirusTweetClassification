@@ -6,11 +6,11 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
-from keras.models import *
-from keras.layers import *
-from keras.callbacks import *
-from keras.preprocessing.text import Tokenizer
-from keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.models import *
+from tensorflow.keras.layers import *
+from tensorflow.keras.callbacks import *
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.utils import to_categorical
 from sklearn.model_selection import GridSearchCV
@@ -20,6 +20,7 @@ from tensorflow.keras import optimizers
 from tensorflow.keras.optimizers import schedules, Adam, SGD, RMSprop
 from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.metrics import confusion_matrix
+from enum import Enum
 
 import pandas as pd
 import csv
@@ -162,10 +163,10 @@ def main():
   ## Create dataset
   if(create_dataset):
     # Load train data
-    train = pd.read_csv('/dataset/Corona_NLP_train.csv', encoding="latin1")
+    train = pd.read_csv('./dataset/Corona_NLP_train.csv', encoding="latin1")
 
     # Load test data
-    test = pd.read_csv('/dataset/Corona_NLP_test.csv', encoding="latin1")
+    test = pd.read_csv('./dataset/Corona_NLP_test.csv', encoding="latin1")
 
     # Merge train and test data
     dataset = pd.concat([train, test])
@@ -197,24 +198,24 @@ def main():
 
     # Save splitted dataset
 
-    np.save('/content/drive/MyDrive/DLA_dataset/X_train', X_train, allow_pickle=True, fix_imports=True)
-    np.save('/content/drive/MyDrive/DLA_dataset/X_test', X_test, allow_pickle=True, fix_imports=True)
-    np.save('/content/drive/MyDrive/DLA_dataset/X_val', X_val, allow_pickle=True, fix_imports=True)
+    np.save('./dataset/X_train', X_train, allow_pickle=True, fix_imports=True)
+    np.save('./dataset/X_test', X_test, allow_pickle=True, fix_imports=True)
+    np.save('./dataset/X_val', X_val, allow_pickle=True, fix_imports=True)
 
-    np.save('/content/drive/MyDrive/DLA_dataset/y_train', Y_train, allow_pickle=True, fix_imports=True)
-    np.save('/content/drive/MyDrive/DLA_dataset/y_test', Y_test, allow_pickle=True, fix_imports=True)
-    np.save('/content/drive/MyDrive/DLA_dataset/y_val', Y_val, allow_pickle=True, fix_imports=True)
+    np.save('./dataset/y_train', Y_train, allow_pickle=True, fix_imports=True)
+    np.save('./dataset/y_test', Y_test, allow_pickle=True, fix_imports=True)
+    np.save('./dataset/y_val', Y_val, allow_pickle=True, fix_imports=True)
 
   else:
     #Load splitted dataset
 
-    X_train = pd.Series(np.load('/content/drive/MyDrive/DLA_dataset/X_train.npy', allow_pickle=True))
-    X_test = pd.Series(np.load('/content/drive/MyDrive/DLA_dataset/X_test.npy', allow_pickle=True))
-    X_val = pd.Series(np.load('/content/drive/MyDrive/DLA_dataset/X_val.npy', allow_pickle=True))
+    X_train = pd.Series(np.load('./dataset/X_train.npy', allow_pickle=True))
+    X_test = pd.Series(np.load('./dataset/X_test.npy', allow_pickle=True))
+    X_val = pd.Series(np.load('./dataset/X_val.npy', allow_pickle=True))
 
-    Y_train = pd.Series(np.load('/content/drive/MyDrive/DLA_dataset/y_train.npy', allow_pickle=True))
-    Y_test = pd.Series(np.load('/content/drive/MyDrive/DLA_dataset/y_test.npy', allow_pickle=True))
-    Y_val = pd.Series(np.load('/content/drive/MyDrive/DLA_dataset/y_val.npy', allow_pickle=True))
+    Y_train = pd.Series(np.load('./dataset/y_train.npy', allow_pickle=True))
+    Y_test = pd.Series(np.load('./dataset/y_test.npy', allow_pickle=True))
+    Y_val = pd.Series(np.load('./dataset/y_val.npy', allow_pickle=True))
 
     num_label_train_index, num_label_train_values = np.unique(Y_train, return_counts=True)
     num_label_test_index, num_label_test_values = np.unique(Y_test, return_counts=True)
@@ -238,7 +239,7 @@ def main():
   #Upload pre-trained model
   if(model_type == Model.GOOGLE):
     # Upload Gooogle News model
-    wv_from_bin = models.KeyedVectors.load_word2vec_format('/content/drive/MyDrive/DLA_dataset/GoogleNews-vectors-negative300.bin', binary=True)
+    wv_from_bin = models.KeyedVectors.load_word2vec_format('./dataset/GoogleNews-vectors-negative300.bin', binary=True)
 
     # Length of words model
     maxlen = 300
@@ -324,7 +325,7 @@ def main():
     print(clf.score(x_test, y_test))
 
     # Logistic Regression
-    clf = LogisticRegression(random_state=0).fit(x_train, y_train)
+    clf = LogisticRegression(random_state=0, solver='liblinear').fit(x_train, y_train)
     y_pred = clf.predict(x_test)
     print("Logistic Regression")
     print("Number of mislabeled points out of a total %d points : %d" % (x_test.shape[0], (y_test != y_pred).sum()))
@@ -332,7 +333,7 @@ def main():
 
     # Logistic Regression with Cross Validation
     parameters = {}
-    clf = GridSearchCV(LogisticRegression(random_state=0), parameters, cv=5).fit(x_train, y_train)
+    clf = GridSearchCV(LogisticRegression(random_state=0, solver='liblinear'), parameters, cv=5).fit(x_train, y_train)
     y_pred = clf.predict(x_test)
     print("Logistic Regression with Cross Validation")
     print("Number of mislabeled points out of a total %d points : %d" % (x_test.shape[0], (y_test != y_pred).sum()))
@@ -443,5 +444,6 @@ def main():
     print(test_acc)
 
 
-if _name_ == "__main__":
+if __name__ == "__main__":
   main()
+
