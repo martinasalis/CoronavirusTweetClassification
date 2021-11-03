@@ -71,7 +71,7 @@ def decontraction(text):
   text = re.sub(r"won\'t've", " will not have", text)
   text = re.sub(r"can\'t", " can not", text)
   text = re.sub(r"don\'t", " do not", text)
-    
+
   text = re.sub(r"can\'t've", " can not have", text)
   text = re.sub(r"ma\'am", " madam", text)
   text = re.sub(r"let\'s", " let us", text)
@@ -80,7 +80,7 @@ def decontraction(text):
   text = re.sub(r"sha\n't", " shall not", text)
   text = re.sub(r"o\'clock", " of the clock", text)
   text = re.sub(r"y\'all", " you all", text)
-    
+
   text = re.sub(r"n\'t", " not", text)
   text = re.sub(r"n\'t've", " not have", text)
   text = re.sub(r"\'re", " are", text)
@@ -103,10 +103,10 @@ def seperate_alphanumeric(text):
 
 
 def cont_rep_char(text):
-    tchr = text.group(0) 
-    
+    tchr = text.group(0)
+
     if len(tchr) > 1:
-        return tchr[0:2] 
+        return tchr[0:2]
 
 
 def unique_char(rep, text):
@@ -149,7 +149,7 @@ def sent_vectorizer(sent, model):
       numw+=1
     except:
       pass
-  
+
   return np.asarray(sent_vec)/numw
 
 
@@ -238,6 +238,7 @@ def main():
   ## Word2Vec model
   #Upload pre-trained model
   if(model_type == Model.GOOGLE):
+    print("GOOGLE vocab")
     # Upload Gooogle News model
     wv_from_bin = models.KeyedVectors.load_word2vec_format('./dataset/GoogleNews-vectors-negative300.bin', binary=True)
 
@@ -248,6 +249,7 @@ def main():
     vectors = wv_from_bin.vectors
 
   elif(model_type == Model.TWITTER):
+    print("TWITTER vocab")
     # Upload Twitter model
     wv_from_bin = gensim.downloader.load('glove-twitter-100')
 
@@ -258,6 +260,7 @@ def main():
     vectors = wv_from_bin.vectors
 
   elif(model_type == Model.DATASET):
+    print("DATASET vocab")
     # Train model
     wv_from_bin = models.Word2Vec(sentences=list(X_train.apply(lambda x: x.split(' '))), min_count=1)
 
@@ -375,13 +378,13 @@ def main():
     y_train = Y_train
     y_val = Y_val
 
-    # Convert y to categorical 
+    # Convert y to categorical
     y_train = to_categorical(y_train, 3)
     y_test  = to_categorical(y_test, 3)
     y_val  = to_categorical(y_val, 3)
 
     max_features = 30000
-    tokenizer = Tokenizer(num_words=max_features) # num_words=max_features, 
+    tokenizer = Tokenizer(num_words=max_features) # num_words=max_features,
     tokenizer.fit_on_texts(list(X_train))
 
     list_tokenized_train = tokenizer.texts_to_sequences(X_train)
@@ -389,7 +392,7 @@ def main():
     list_tokenized_test = tokenizer.texts_to_sequences(X_test)
 
     # convert tokenized texts into same padding size
-    embed_size = 128 
+    embed_size = 128
     X_train_final = pad_sequences(list_tokenized_train, maxlen=maxlen)
     X_val_final = pad_sequences(list_tokenized_val, maxlen=maxlen)
     X_test_final = pad_sequences(list_tokenized_test, maxlen=maxlen)
@@ -446,4 +449,3 @@ def main():
 
 if __name__ == "__main__":
   main()
-
