@@ -23,7 +23,7 @@ pip3 install -r requirements.txt
 ```
 3. Download Google Word2Vec pre-trained model from this [link](https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?resourcekey=0-wjGZdNAUop6WykTtMip30g) and unzip the file in ```dataset/``` folder.
 
-4. The code is currently training the neural network. You can execute other pieces of code by changing the flags found from line 180 to line 184 of the ```main.py``` file. To run the project enter the following command:
+4. The code is currently training the neural network. You can execute other pieces of code by changing the flags found from line 158 to line 161 of the ```main.py``` file. To run the project enter the following command:
 ```bash
 python3 main.py
 ```
