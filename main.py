@@ -137,20 +137,21 @@ def conv_sentiment_to_int(tweet_sentiment):
     return 2
 
 
-def sent_vectorizer(sent, model):
-  sent_vec = []
-  numw = 0
-  for w in sent:
-    try:
-      if numw == 0:
-        sent_vec = model[w]
-      else:
-        sent_vec = np.add(sent_vec, model[w])
-      numw+=1
-    except:
-      pass
+def get_embedding(words, model, maxlen):
+  valid_words = [word for word in words if word in model.wv.vocab]
+  if valid_words:
+    embedding = np.zeros((len(valid_words), maxlen), dtype=np.float32)
+    for idx, word in enumerate(valid_words):
+      embedding[idx] = model.wv[word]
 
-  return np.asarray(sent_vec)/numw
+    return np.mean(embedding, axis=0)
+  else:
+    return np.zeros(maxlen)
+
+
+def sent_vect(X, model, maxlen):
+  X_embeddings = np.array([get_embedding(words, model, maxlen) for words in X])
+  return X_embeddings
 
 
 def main():
@@ -277,21 +278,9 @@ def main():
   ## Baseline
   if(do_baseline):
     # Vectorized tweets
-    x_train = []
-    for sentence in list(X_train):
-        x_train.append(sent_vectorizer(sentence, wv_from_bin))
-
-    x_test = []
-    for sentence in list(X_test):
-        x_test.append(sent_vectorizer(sentence, wv_from_bin))
-
-    x_val = []
-    for sentence in list(X_val):
-        x_val.append(sent_vectorizer(sentence, wv_from_bin))
-
-    x_train = pad_sequences(np.array(x_train), maxlen=maxlen)
-    x_test = pad_sequences(np.array(x_test), maxlen=maxlen)
-    x_val = pad_sequences(np.array(x_val), maxlen=maxlen)
+    x_train = sent_vect(list(X_train.apply(lambda x: x.split(' '))), wv_from_bin, maxlen)
+    x_test = sent_vect(list(X_test.apply(lambda x: x.split(' '))), wv_from_bin, maxlen)
+    x_val = sent_vect(list(X_val.apply(lambda x: x.split(' '))), wv_from_bin, maxlen)
 
     y_test = Y_test
     y_train = Y_train
